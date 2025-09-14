@@ -28,21 +28,25 @@ const NotesGrid = ({ notes, onEdit, onDelete }: NotesGridProps) => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
       {notes.map((note) => (
         <Card 
           key={note.id} 
-          className="shadow-soft hover:shadow-medium transition-all duration-300 cursor-pointer group border-0 bg-gradient-card"
+          className="shadow-soft hover:shadow-medium transition-all duration-300 cursor-pointer group border-0 bg-gradient-card h-full flex flex-col"
           onClick={() => onEdit(note)}
         >
-          <CardHeader className="pb-3">
-            <div className="flex items-start justify-between">
-              <h3 className="font-semibold text-lg line-clamp-2 group-hover:text-primary transition-colors">
+          <CardHeader className="pb-3 flex-shrink-0">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="font-semibold text-base sm:text-lg line-clamp-2 group-hover:text-primary transition-colors min-w-0">
                 {note.title}
               </h3>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="opacity-0 group-hover:opacity-100 sm:opacity-100 transition-opacity flex-shrink-0 h-8 w-8 p-0"
+                  >
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -69,20 +73,20 @@ const NotesGrid = ({ notes, onEdit, onDelete }: NotesGridProps) => {
             </div>
           </CardHeader>
           
-          <CardContent className="pb-3">
-            <p className="text-muted-foreground text-sm line-clamp-3">
-              {truncateContent(note.content)}
+          <CardContent className="pb-3 flex-grow">
+            <p className="text-muted-foreground text-sm line-clamp-4">
+              {truncateContent(note.content, 150)}
             </p>
           </CardContent>
           
-          <CardFooter className="pt-3 border-t border-border/50">
+          <CardFooter className="pt-3 border-t border-border/50 flex-shrink-0">
             <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                <span>Updated {formatDate(note.updatedAt)}</span>
+              <div className="flex items-center gap-1 min-w-0">
+                <Calendar className="h-3 w-3 flex-shrink-0" />
+                <span className="truncate">Updated {formatDate(note.updatedAt)}</span>
               </div>
               {note.createdAt !== note.updatedAt && (
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs flex-shrink-0 ml-2">
                   Edited
                 </Badge>
               )}

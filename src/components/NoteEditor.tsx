@@ -35,16 +35,17 @@ const NoteEditor = ({ note, onSave, onCancel }: NoteEditorProps) => {
   const isValid = title.trim().length > 0;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" onClick={onCancel} size="sm">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+        <Button variant="ghost" onClick={onCancel} size="sm" className="self-start">
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
+          <span className="hidden xs:inline">Back to Dashboard</span>
+          <span className="xs:hidden">Back</span>
         </Button>
-        <div className="flex items-center gap-2">
-          <FileText className="h-5 w-5 text-primary" />
-          <h1 className="text-2xl font-bold">
+        <div className="flex items-center gap-2 min-w-0">
+          <FileText className="h-5 w-5 text-primary flex-shrink-0" />
+          <h1 className="text-xl sm:text-2xl font-bold truncate">
             {note ? 'Edit Note' : 'Create New Note'}
           </h1>
         </div>
@@ -52,13 +53,13 @@ const NoteEditor = ({ note, onSave, onCancel }: NoteEditorProps) => {
 
       {/* Editor */}
       <Card className="shadow-medium border-0 bg-gradient-card">
-        <CardHeader>
-          <CardTitle className="text-lg">
+        <CardHeader className="px-4 sm:px-6">
+          <CardTitle className="text-base sm:text-lg">
             {note ? 'Edit your note' : 'Write your thoughts'}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <CardContent className="px-4 sm:px-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             <div className="space-y-2">
               <label htmlFor="title" className="text-sm font-medium">
                 Title
@@ -68,7 +69,7 @@ const NoteEditor = ({ note, onSave, onCancel }: NoteEditorProps) => {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter note title..."
-                className="text-lg font-medium"
+                className="text-base sm:text-lg font-medium h-11"
                 required
               />
             </div>
@@ -82,22 +83,23 @@ const NoteEditor = ({ note, onSave, onCancel }: NoteEditorProps) => {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Start writing your note..."
-                className="min-h-[400px] resize-none"
+                className="min-h-[300px] sm:min-h-[400px] resize-none"
               />
             </div>
             
-            <div className="flex items-center justify-between pt-4 border-t border-border/50">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 pt-4 border-t border-border/50">
               <div className="text-sm text-muted-foreground">
                 {content.length} characters
               </div>
-              <div className="flex gap-3">
-                <Button type="button" variant="outline" onClick={onCancel}>
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                <Button type="button" variant="outline" onClick={onCancel} className="order-2 sm:order-1">
                   Cancel
                 </Button>
                 <Button 
                   type="submit" 
                   variant="gradient"
                   disabled={!isValid}
+                  className="order-1 sm:order-2"
                 >
                   <Save className="h-4 w-4 mr-2" />
                   {note ? 'Update Note' : 'Create Note'}
@@ -111,17 +113,17 @@ const NoteEditor = ({ note, onSave, onCancel }: NoteEditorProps) => {
       {/* Preview */}
       {(title || content) && (
         <Card className="shadow-soft">
-          <CardHeader>
+          <CardHeader className="px-4 sm:px-6">
             <CardTitle className="text-sm text-muted-foreground">Preview</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6">
             <div className="space-y-3">
               {title && (
-                <h3 className="text-xl font-semibold">{title}</h3>
+                <h3 className="text-lg sm:text-xl font-semibold break-words">{title}</h3>
               )}
               {content && (
                 <div className="prose prose-sm max-w-none">
-                  <p className="whitespace-pre-wrap text-muted-foreground">
+                  <p className="whitespace-pre-wrap text-muted-foreground break-words">
                     {content}
                   </p>
                 </div>
