@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
 import { AuthService } from '@/lib/auth';
-import { NotesService } from '@/lib/notes';
+import { APIService } from '@/lib/api';
 import { TenantsService } from '@/lib/tenants';
 import { Note } from '@/types';
 import Layout from '@/components/Layout';
 import NotesGrid from '@/components/NotesGrid';
 import NoteEditor from '@/components/NoteEditor';
 import SubscriptionCard from '@/components/SubscriptionCard';
+import HealthCheck from '@/components/HealthCheck';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, FileText, Users, TrendingUp, Crown } from 'lucide-react';
+import { Plus, FileText, Users, TrendingUp, Crown, Activity } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const Dashboard = () => {
@@ -24,12 +25,24 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (user) {
-      const userNotes = NotesService.getNotesByTenant(user.tenantId);
-      setNotes(userNotes);
+      loadNotes();
     }
   }, [user]);
 
-  const handleCreateNote = () => {
+  const loadNotes = async () => {
+    try {
+      const userNotes = await APIService.getNotes();
+      setNotes(userNotes);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load notes",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleNewNote = () => {
     if (!user || !tenant) return;
     
     // Check note limit for free plan
@@ -51,52 +64,66 @@ const Dashboard = () => {
     setIsEditing(true);
   };
 
-  const handleSaveNote = (title: string, content: string) => {
-    if (!user) return;
+  const handleSaveNote = async (title: string, content: string) => {
+    if (!editingNote) {
+      await handleCreateNote(title, content);
+      return;
+    }
 
     try {
-      if (editingNote) {
-        const updated = NotesService.updateNote(editingNote.id, { title, content });
-        if (updated) {
-          setNotes(NotesService.getNotesByTenant(user.tenantId));
-          toast({
-            title: 'Note updated',
-            description: 'Your note has been successfully updated.',
-          });
-        }
-      } else {
-        NotesService.createNote({
-          title,
-          content,
-          userId: user.id,
-          tenantId: user.tenantId,
-        });
-        setNotes(NotesService.getNotesByTenant(user.tenantId));
-        toast({
-          title: 'Note created',
-          description: 'Your new note has been successfully created.',
-        });
-      }
+      const updatedNote = await APIService.updateNote(editingNote.id, { title, content });
+      setNotes(notes.map(note => 
+        note.id === editingNote.id ? updatedNote : note
+      ));
       setIsEditing(false);
       setEditingNote(null);
+
+      toast({
+        title: "Note updated",
+        description: "Your note has been updated successfully.",
+      });
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to save note. Please try again.',
-        variant: 'destructive',
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update note. Please try again.",
+        variant: "destructive",
       });
     }
   };
 
-  const handleDeleteNote = (noteId: string) => {
-    if (!user) return;
+  const handleCreateNote = async (title: string, content: string) => {
+    try {
+      const newNote = await APIService.createNote({ title, content });
+      setNotes([...notes, newNote]);
+      setIsEditing(false);
+      setEditingNote(null);
 
-    const success = NotesService.deleteNote(noteId);
-    if (success) {
-      setNotes(NotesService.getNotesByTenant(user.tenantId));
       toast({
-        title: 'Note deleted',
-        description: 'The note has been successfully deleted.',
+        title: "Note created",
+        description: "Your note has been created successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create note. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    try {
+      await APIService.deleteNote(noteId);
+      setNotes(notes.filter(note => note.id !== noteId));
+      toast({
+        title: "Note deleted",
+        description: "Your note has been deleted successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete note. Please try again.",
+        variant: "destructive",
       });
     }
   };
@@ -160,7 +187,7 @@ const Dashboard = () => {
               Manage your notes in the {tenant.name} workspace
             </p>
           </div>
-          <Button onClick={handleCreateNote} variant="gradient" size="lg">
+          <Button onClick={handleNewNote} variant="gradient" size="lg">
             <Plus className="h-4 w-4 mr-2" />
             New Note
           </Button>
@@ -182,10 +209,17 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* Subscription Card for Free Plan */}
-        {tenant.plan === 'free' && user.role === 'admin' && (
-          <SubscriptionCard tenant={tenant} />
-        )}
+        {/* Additional Components */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <HealthCheck />
+          
+          {/* Subscription Card for Free Plan */}
+          {tenant.plan === 'free' && user.role === 'admin' && (
+            <div className="md:col-span-2">
+              <SubscriptionCard tenant={tenant} />
+            </div>
+          )}
+        </div>
 
         {/* Notes Section */}
         <div className="space-y-4">
@@ -206,7 +240,7 @@ const Dashboard = () => {
                 <p className="text-muted-foreground mb-4">
                   Create your first note to get started organizing your thoughts.
                 </p>
-                <Button onClick={handleCreateNote} variant="gradient">
+                <Button onClick={handleNewNote} variant="gradient">
                   <Plus className="h-4 w-4 mr-2" />
                   Create First Note
                 </Button>

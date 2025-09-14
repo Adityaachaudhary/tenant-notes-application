@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Tenant } from '@/types';
-import { TenantsService } from '@/lib/tenants';
+import { APIService } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,26 +19,22 @@ const SubscriptionCard = ({ tenant }: SubscriptionCardProps) => {
     setIsUpgrading(true);
     
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const result = await APIService.upgradeTenant(tenant.slug);
       
-      const success = TenantsService.upgradeTenant(tenant.slug);
-      
-      if (success) {
+      if (result.success) {
         toast({
-          title: 'Upgraded to Pro!',
-          description: 'Your workspace now has unlimited notes and all premium features.',
+          title: "Successfully upgraded to Pro!",
+          description: "You now have unlimited notes and premium features.",
         });
-        // Force a page reload to refresh tenant data
+        
+        // Trigger a page refresh to update the UI
         window.location.reload();
-      } else {
-        throw new Error('Upgrade failed');
       }
     } catch (error) {
       toast({
-        title: 'Upgrade failed',
-        description: 'There was an error upgrading your subscription. Please try again.',
-        variant: 'destructive',
+        title: "Upgrade failed",
+        description: error instanceof Error ? error.message : "There was an error upgrading your subscription. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setIsUpgrading(false);

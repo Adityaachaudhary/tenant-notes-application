@@ -1,73 +1,119 @@
-# Welcome to your Lovable project
+# Multi-Tenant SaaS Notes Application
 
-## Project info
+A modern, multi-tenant SaaS application for managing notes with role-based access control and subscription management.
 
-**URL**: https://lovable.dev/projects/c9950e5c-fde4-4fbc-8f06-aafab4434050
+## Multi-Tenancy Architecture
 
-## How can I edit this code?
+**Chosen Approach: Shared Schema with Tenant ID Column**
 
-There are several ways of editing your application.
+This application uses a shared schema approach where all data is stored in the same tables but isolated using a `tenantId` column. This approach offers:
 
-**Use Lovable**
+- **Cost Efficiency**: Single database instance for all tenants
+- **Simplified Maintenance**: One schema to maintain and backup
+- **Scalability**: Easy to add new tenants without infrastructure changes
+- **Security**: Strict tenant isolation through application-level filtering
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c9950e5c-fde4-4fbc-8f06-aafab4434050) and start prompting.
+### Data Isolation Strategy
 
-Changes made via Lovable will be committed automatically to this repo.
+- Every data model includes a `tenantId` field
+- All queries are automatically filtered by the current user's tenant
+- Role-based access control ensures users can only access their tenant's data
+- localStorage simulation maintains tenant boundaries in the frontend
 
-**Use your preferred IDE**
+## Features
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 🏢 Multi-Tenancy
+- Support for multiple tenants (Acme Corp, Globex Corporation)
+- Strict data isolation between tenants
+- Tenant-specific branding and configuration
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 🔐 Authentication & Authorization
+- JWT-based authentication simulation
+- Role-based access control (Admin, Member)
+- Protected routes and API endpoints
 
-Follow these steps:
+### 📝 Notes Management
+- Full CRUD operations for notes
+- Tenant-isolated note storage
+- Rich text content support
+- Real-time updates
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### 💳 Subscription Management
+- Free Plan: Maximum 3 notes per tenant
+- Pro Plan: Unlimited notes
+- Admin-only upgrade functionality
+- Instant plan upgrades
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## Test Accounts
 
-# Step 3: Install the necessary dependencies.
-npm i
+All test accounts use the password: `password`
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+| Email | Role | Tenant | Access |
+|-------|------|--------|---------|
+| admin@acme.test | Admin | Acme Corp | Full access + upgrades |
+| user@acme.test | Member | Acme Corp | Notes management only |
+| admin@globex.test | Admin | Globex Corporation | Full access + upgrades |
+| user@globex.test | Member | Globex Corporation | Notes management only |
 
-**Edit a file directly in GitHub**
+## API Endpoints (Simulated)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Authentication
+- `POST /auth/login` - User login
+- `POST /auth/logout` - User logout
 
-**Use GitHub Codespaces**
+### Notes
+- `POST /notes` - Create a note
+- `GET /notes` - List all notes for current tenant
+- `GET /notes/:id` - Retrieve specific note
+- `PUT /notes/:id` - Update a note
+- `DELETE /notes/:id` - Delete a note
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Tenants
+- `POST /tenants/:slug/upgrade` - Upgrade tenant subscription (Admin only)
+- `GET /tenants/:slug` - Get tenant information
 
-## What technologies are used for this project?
+### Health Check
+- `GET /health` - Health status endpoint
 
-This project is built with:
+## Technology Stack
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **Frontend**: React 18, TypeScript, Tailwind CSS
+- **State Management**: React hooks with localStorage persistence
+- **Routing**: React Router DOM
+- **UI Components**: Radix UI + shadcn/ui
+- **Authentication**: JWT simulation
+- **Data Storage**: localStorage (for development/demo)
 
-## How can I deploy this project?
+## Getting Started
 
-Simply open [Lovable](https://lovable.dev/projects/c9950e5c-fde4-4fbc-8f06-aafab4434050) and click on Share -> Publish.
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Start development server: `npm run dev`
+4. Login with any of the test accounts above
 
-## Can I connect a custom domain to my Lovable project?
+## Deployment
 
-Yes, you can!
+The application is configured for Vercel deployment with:
+- Static site generation
+- CORS enabled for API access
+- Health endpoint for monitoring
+- Environment-specific configurations
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Security Features
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- Tenant data isolation
+- Role-based access control
+- Protected routes
+- JWT token validation
+- Input sanitization
+- XSS protection
+
+## Future Enhancements
+
+- Real backend integration with Supabase
+- Email invitations for new users
+- Advanced user management
+- Audit logging
+- Real-time collaboration
+- File attachments
+- Search functionality
