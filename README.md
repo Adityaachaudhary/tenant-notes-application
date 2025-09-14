@@ -296,4 +296,3 @@ Contributions are welcome! Please read the contributing guidelines and code of c
 
 ---
 
-**Built with ❤️ using React, TypeScript, and Tailwind CSS**
